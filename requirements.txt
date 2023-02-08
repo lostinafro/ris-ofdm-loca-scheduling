@@ -1,0 +1,6 @@
+numpy==1.21.5
+cupy==10.6
+scipy==1.7.3
+matplotlib~=3.5.1
+tqdm~=4.64.0
+tikzplotlib~=0.10.1
