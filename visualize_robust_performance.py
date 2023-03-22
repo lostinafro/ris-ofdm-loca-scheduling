@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import scenario.common as cmn
-from environment import command_parser, OUTPUT_DIR, RISFrequencyEnv2D
-from test_robust_max_rate import kappa_dB_vec, epsilon
+from frequency_scheduling.environment import command_parser, OUTPUT_DIR, RISFrequencyEnv2D
+from frequency_scheduling.test_robust_max_rate import kappa_dB_vec, epsilon
 
 
 bs_pos = np.array([[10, 100, 0]])
@@ -57,7 +57,7 @@ if __name__ == '__main__':
                 users = np.arange(ue_init, overloading_factor * resources * Cmax + quant, quant)
 
             # compute some data
-            tau_csi = np.ceil(users * (env.ris.num_els_h + 1) / 2)
+            tau_csi = np.ceil(users * (env.ris.num_els_h + 1))
             N_ofdm_csi = tau_csi
             N_ofdm = 14
             ratio_csi = Cmax * N_ofdm / (Cmax * N_ofdm + N_ofdm_csi)
@@ -77,41 +77,46 @@ if __name__ == '__main__':
             fairness_seq = np.mean(fairness_seq, axis=0)
             fairness_bnc = np.mean(fairness_bnc, axis=0)
 
-            k = 0
-            rate_vs_kappa_jnt[i] = avg_throughput_jnt[k]
-            rate_vs_kappa_seq[i] = avg_throughput_seq[k]
-            rate_vs_kappa_bnc[i] = avg_throughput_bnc[k]
+            if n == 'max_rate':
+                k = 0
+                rate_vs_kappa_jnt[i] = avg_throughput_jnt[k]
+                rate_vs_kappa_seq[i] = avg_throughput_seq[k]
+                rate_vs_kappa_bnc[i] = avg_throughput_bnc[k]
+                tit = f'avg rate $K = ${users[k]}'
+            else:
+                k = -1
+                rate_vs_kappa_jnt[i] = throughput_per_ue_jnt[k]
+                rate_vs_kappa_seq[i] = throughput_per_ue_seq[k]
+                rate_vs_kappa_bnc[i] = throughput_per_ue_bnc[k]
+                tit = f'per user $K = ${users[k]}'
+
             fair_vs_kappa_jnt[i] = fairness_jnt[k]
             fair_vs_kappa_seq[i] = fairness_seq[k]
             fair_vs_kappa_bnc[i] = fairness_bnc[k]
 
-            rate_vs_kappa_jnt[i] = throughput_per_ue_jnt[k]
-            rate_vs_kappa_seq[i] = throughput_per_ue_seq[k]
-            rate_vs_kappa_bnc[i] = throughput_per_ue_bnc[k]
 
+            if kappa_dB == -9:
+                # Figure plot
+                plt.plot(users, avg_throughput_jnt, label=r'\texttt{jnt}', marker='d')
+                plt.plot(users, avg_throughput_seq, label=r'\texttt{seq}', marker='x')
+                plt.plot(users, avg_throughput_bnc, label=r'\texttt{csi}', linestyle='dashed')
+                filename = f'{n}_throughput_vs_K' + f'_kappa{kappa_dB:02.0f}'
+                cmn.printplot(render=render, filename=filename, dirname=OUTPUT_DIR,
+                              title=f'$\kappa = ${kappa_dB} [dB]', labels=['$K$', 'throughput [Mbit/s]'])
 
+                plt.plot(users, throughput_per_ue_jnt, label=r'\texttt{jnt}', marker='d')
+                plt.plot(users, throughput_per_ue_seq, label=r'\texttt{seq}', marker='x')
+                plt.plot(users, throughput_per_ue_bnc, label=r'\texttt{csi}', linestyle='dashed')
+                filename = f'{n}_throughput_per_ue_vs_K' + f'_kappa{kappa_dB:02.0f}'
+                cmn.printplot(render=render, filename=filename, dirname=OUTPUT_DIR,
+                              title=f'per user $\kappa = $ {kappa_dB} [dB]', labels=['$K$', 'throughput [Mbit/s]'])
 
-            # Figure plot
-            plt.plot(users, avg_throughput_jnt, label=r'\texttt{jnt}', marker='d')
-            plt.plot(users, avg_throughput_seq, label=r'\texttt{seq}', marker='x')
-            plt.plot(users, avg_throughput_bnc, label=r'\texttt{csi}', linestyle='dashed')
-            filename = f'{n}_throughput_vs_K' + f'_kappa{kappa_dB:02.0f}'
-            cmn.printplot(render=render, filename=filename, dirname=OUTPUT_DIR,
-                          title=f'$\kappa = ${kappa_dB} [dB]', labels=['$K$', 'throughput [Mbit/s]'])
-
-            plt.plot(users, throughput_per_ue_jnt, label=r'\texttt{jnt}', marker='d')
-            plt.plot(users, throughput_per_ue_seq, label=r'\texttt{seq}', marker='x')
-            plt.plot(users, throughput_per_ue_bnc, label=r'\texttt{csi}', linestyle='dashed')
-            filename = f'{n}_throughput_per_ue_vs_K' + f'_kappa{kappa_dB:02.0f}'
-            cmn.printplot(render=render, filename=filename, dirname=OUTPUT_DIR,
-                          title=f'per user $\kappa = $ {kappa_dB} [dB]', labels=['$K$', 'throughput [Mbit/s]'])
-
-            plt.plot(users, fairness_jnt, label=r'\texttt{jnt}', marker='d')
-            plt.plot(users, fairness_seq, label=r'\texttt{seq}', marker='x')
-            plt.plot(users, fairness_bnc, label=r'\texttt{csi}', linestyle='dashed')
-            filename = f'{n}_fairness_vs_K' + f'_kappa{kappa_dB:02.0f}'
-            cmn.printplot(render=render, filename=filename, dirname=OUTPUT_DIR,
-                          title=f'$\kappa = ${kappa_dB} [dB]', labels=['$K$', "Jain's Fairness"])
+                plt.plot(users, fairness_jnt, label=r'\texttt{jnt}', marker='d')
+                plt.plot(users, fairness_seq, label=r'\texttt{seq}', marker='x')
+                plt.plot(users, fairness_bnc, label=r'\texttt{csi}', linestyle='dashed')
+                filename = f'{n}_fairness_vs_K' + f'_kappa{kappa_dB:02.0f}'
+                cmn.printplot(render=render, filename=filename, dirname=OUTPUT_DIR,
+                              title=f'$\kappa = ${kappa_dB} [dB]', labels=['$K$', "Jain's Fairness"])
 
         # Figure plot
         plt.plot(kappa_dB_vec, rate_vs_kappa_jnt, label=r'\texttt{jnt}', marker='d')
@@ -119,7 +124,7 @@ if __name__ == '__main__':
         plt.plot(kappa_dB_vec, rate_vs_kappa_bnc, label=r'\texttt{csi}', linestyle='dashed')
         filename = f'{n}_throughput_vs_kappa'
         cmn.printplot(render=render, filename=filename, dirname=OUTPUT_DIR,
-                      title=f'$K = ${users[k]}', labels=['$\kappa$', 'throughput [Mbit/s]'])
+                      title=tit, labels=['$\kappa$', 'throughput [Mbit/s]'])
 
 
 
