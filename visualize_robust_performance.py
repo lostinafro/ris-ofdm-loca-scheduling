@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import scenario.common as cmn
-from frequency_scheduling.environment import command_parser, OUTPUT_DIR, RISFrequencyEnv2D
-from frequency_scheduling.test_robust_max_rate import kappa_dB_vec, epsilon
+from environment import command_parser, OUTPUT_DIR, RISFrequencyEnv2D
+from test_robust_max_rate import kappa_dB_vec, epsilon
 
 
 bs_pos = np.array([[10, 100, 0]])
@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 from test_robust_max_rate import overloading_factor
                 users = np.array(resources * Cmax * overloading_factor, dtype=int)
             else:
-                from test_matching_max_min import ue_init, quant, overloading_factor
+                from test_robust_max_min import ue_init, quant, overloading_factor
                 users = np.arange(ue_init, overloading_factor * resources * Cmax + quant, quant)
 
             # compute some data
