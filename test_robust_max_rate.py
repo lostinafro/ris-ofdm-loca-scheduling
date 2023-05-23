@@ -180,24 +180,3 @@ if __name__ == '__main__':
                     np.savez(filename, last=k_batch, fairness_jnt=fairness_jnt, fairness_seq=fairness_seq, fairness_bnc=fairness_bnc,
                              avg_throughput_jnt=avg_throughput_jnt, avg_throughput_seq=avg_throughput_seq, avg_throughput_bnc=avg_throughput_bnc,
                              ues_allocated_jnt=ues_allocated_jnt, ues_allocated_seq=ues_allocated_seq, ues_allocated_bnc=ues_allocated_bnc)
-
-
-            if not render:
-                # Take the average over the batch size
-                avg_throughput_jnt = np.squeeze(np.mean(avg_throughput_jnt, axis=0))
-                avg_throughput_seq = np.squeeze(np.mean(avg_throughput_seq, axis=0))
-                avg_throughput_bnc = np.squeeze(np.mean(avg_throughput_bnc, axis=0))
-                fairness_jnt = np.squeeze(np.mean(fairness_jnt, axis=0))
-                fairness_seq = np.squeeze(np.mean(fairness_seq, axis=0))
-                fairness_bnc = np.squeeze(np.mean(fairness_bnc, axis=0))
-
-                # Figure plot
-                plt.plot(users, avg_throughput_jnt / 1e6, label='RIS (jointly)')
-                plt.plot(users, avg_throughput_seq / 1e6, label='RIS (seq)')
-                plt.plot(users, avg_throughput_bnc / 1e6, label='RIS CSI')
-                cmn.printplot(labels=['$K$', 'throughput [Mbit/s]'])
-
-                plt.plot(users, fairness_jnt, label='RIS (jointly)')
-                plt.plot(users, fairness_seq, label='RIS (seq)')
-                plt.plot(users, fairness_bnc, label='RIS CSI')
-                cmn.printplot(labels=['$K$', 'Fairness'])
